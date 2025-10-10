@@ -87,6 +87,7 @@ class Trainer(BaseTrainer):
     def log_spectrogram(self, spectrogram, **batch):
         spectrogram_for_plot = spectrogram[0].detach().cpu()
         image = plot_spectrogram(spectrogram_for_plot)
+        # ЗДЕСЬ НУЖНО ЛОГИРОВАТЬ ОРИГИНАЛЬНУЮ СПЕКТРОГРАММУ
         self.writer.add_image("spectrogram", image)
 
     def log_predictions(
@@ -105,6 +106,7 @@ class Trainer(BaseTrainer):
         argmax_texts = [self.text_encoder.ctc_decode(inds) for inds in argmax_inds]
         tuples = list(zip(argmax_texts, text, argmax_texts_raw, audio_path))
 
+        # TBD
         rows = {}
         for pred, target, raw_pred, audio_path in tuples[:examples_to_log]:
             target = self.text_encoder.normalize_text(target)

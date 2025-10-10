@@ -87,7 +87,10 @@ class BaseDataset(Dataset):
         spectrogram = self.get_spectrogram(audio)
 
         instance_data = {
+            # (1, len(audio))
+            "original_audio": audio.detach().clone(),  # raw waveform (time domain)
             "audio": audio,
+            "original_spectrogram": spectrogram.detach().clone(),  # raw spectrogram (freq-time domain)
             "spectrogram": spectrogram,
             "text": text,
             "text_encoded": text_encoded,
