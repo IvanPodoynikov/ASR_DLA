@@ -34,7 +34,7 @@ class MaskConvs(nn.Module):
                     k=module.kernel_size[1],
                     s=module.stride[1],
                 )
-            mask = torch.zeros_like(x, dtype=torch.bool)
+            mask = torch.zeros_like(x, dtype=torch.bool, device=x.device)
             for i, length in enumerate(updated_lengths):
                 length = length.item()
                 if (mask[i].size(-1) - length) > 0:
