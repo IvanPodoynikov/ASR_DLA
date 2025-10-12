@@ -8,15 +8,6 @@ def size_after_conv(dim, pad, k, s):
     return (dim + 2 * pad - k) // s + 1
 
 
-class ClippedReLU(nn.Module):
-    def __init__(self, cap: float = 20.0):
-        super().__init__()
-        self.cap = cap
-
-    def forward(self, x):
-        return torch.clamp(nn.functional.relu(x), max=self.cap)
-
-
 class MaskConvs(nn.Module):
     # маскирует остатки после паддинга
     def __init__(self, seq_modules):
@@ -73,7 +64,7 @@ class BatchRNN(nn.Module):
                 self.batch_norm(x.transpose(1, 2)).transpose(1, 2).contiguous()
             )  # (B, T, F)
         x = nn.utils.rnn.pack_padded_sequence(
-            x, output_length.cpu(), batch_first=True, enforce_sorted=False
+            x, output_length, batch_first=True, enforce_sorted=False
         )
         x, _ = self.cell(x)
         x, _ = nn.utils.rnn.pad_packed_sequence(x, batch_first=True)
@@ -105,7 +96,7 @@ class DeepSpeech2(nn.Module):
                     bias=False,
                 ),
                 nn.BatchNorm2d(32),
-                ClippedReLU(20.0),
+                nn.Hardtanh(0, 20, inplace=True),
                 nn.Conv2d(
                     32,
                     32,
@@ -115,7 +106,7 @@ class DeepSpeech2(nn.Module):
                     bias=False,
                 ),
                 nn.BatchNorm2d(32),
-                ClippedReLU(20.0),
+                nn.Hardtanh(0, 20, inplace=True),
                 nn.Conv2d(
                     32,
                     96,
