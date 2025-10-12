@@ -88,10 +88,10 @@ class BaseDataset(Dataset):
 
         instance_data = {
             # (1, len(audio))
-            "original_audio": audio.detach().clone(),  # raw waveform (time domain)
+            # "original_audio": audio.detach().clone(),  # raw waveform (time domain)
             "audio": audio,
-            "original_spectrogram": spectrogram.detach().clone(),  # raw spectrogram (freq-time domain)
-            "spectrogram": spectrogram,
+            # "original_spectrogram": spectrogram.detach().clone(),  # raw spectrogram (freq-time domain)
+            "spectrogram": spectrogram,  # (1, F, T)
             "text": text,
             "text_encoded": text_encoded,
             "audio_path": audio_path,

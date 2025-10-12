@@ -1,0 +1,6 @@
+_target_: src.model.DeepSpeech2
+n_feats: 128
+rnn_hidden: 1024
+rnn_layers: 7
+bidirectional: True
+rnn_type: "gru"
