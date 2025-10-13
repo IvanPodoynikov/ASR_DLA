@@ -1,4 +1,6 @@
 torch==2.2.0
+editdistance==0.8.1
+wget==3.2
 torchvision==0.17.0
 torchaudio==2.2.0
 soundfile
