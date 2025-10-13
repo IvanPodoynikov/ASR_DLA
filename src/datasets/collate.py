@@ -42,16 +42,20 @@ def collate_fn(dataset_items: list[dict]):
         result_batch["text_encoded"].append(element["text_encoded"].transpose(-1, -2))
         result_batch["text_encoded_length"].append(element["text_encoded"].shape[-1])
 
-    result_batch["spectrogram"] = pad_sequence(
-        result_batch["spectrogram"], batch_first=True
-    ).transpose(-1, -2)
+    result_batch["spectrogram"] = (
+        pad_sequence(result_batch["spectrogram"], batch_first=True)
+        .transpose(-1, -2)
+        .contiguous()
+    )
     result_batch["spectrogram_length"] = torch.tensor(
         result_batch["spectrogram_length"], dtype=torch.int
     )
 
-    result_batch["text_encoded"] = pad_sequence(
-        result_batch["text_encoded"], batch_first=True
-    ).squeeze(-1)
+    result_batch["text_encoded"] = (
+        pad_sequence(result_batch["text_encoded"], batch_first=True)
+        .squeeze(-1)
+        .contiguous()
+    )
     result_batch["text_encoded_length"] = torch.tensor(
         result_batch["text_encoded_length"], dtype=torch.int
     )
