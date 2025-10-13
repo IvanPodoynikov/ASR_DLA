@@ -2,7 +2,6 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 
 
-# оч странно, что функция к self не относится, не могу из baseline.yaml тянуть инфу
 def collate_fn(dataset_items: list[dict]):
     """
     Collate and pad fields in the dataset items.
@@ -15,25 +14,46 @@ def collate_fn(dataset_items: list[dict]):
         result_batch (dict[Tensor]): dict, containing batch-version
             of the tensors.
     """
+    result_batch = {
+        key: []
+        for key in [
+            "audio",
+            "spectrogram",
+            "text",
+            "text_encoded",
+            "audio_path",
+            "spectrogram_length",
+            "text_encoded_length",
+        ]
+    }
+    if not dataset_items:
+        return result_batch
 
-    def _strip_leading_channel(key: str, t: torch.Tensor):
-        if key == "spectrogram":
-            return t.squeeze(0).transpose(0, 1)  # (1, F, T) -> (T, F)
-        elif key == "text_encoded":
-            return t.squeeze(0)
-        return t
+    for element in dataset_items:
+        result_batch["audio"].append(element["audio"])
+        result_batch["audio_path"].append(element["audio_path"])
 
-    keys = list(dataset_items[0].keys())
-    result_batch = {key: [] for key in keys}
-    for key in keys:
-        values = [_strip_leading_channel(key, item[key]) for item in dataset_items]
-    if key in ["spectrogram", "text_encoded"]:
-        result_batch[key] = pad_sequence(values, batch_first=True, padding_value=0)
-        result_batch[f"{key}_length"] = torch.Tensor(
-            [value.shape[0] for value in values]
-        ).long()
-        if key == "spectrogram":
-            result_batch[key] = result_batch[key].transpose(1, 2)  # (B, F, T)
-    else:
-        result_batch[key] = values  # keep as list (e.g., strings, paths)
+        result_batch["spectrogram"].append(
+            element["spectrogram"].squeeze(0).transpose(-1, -2)
+        )
+        result_batch["spectrogram_length"].append(element["spectrogram"].shape[-1])
+
+        result_batch["text"].append(element["text"])
+        result_batch["text_encoded"].append(element["text_encoded"].transpose(-1, -2))
+        result_batch["text_encoded_length"].append(element["text_encoded"].shape[-1])
+
+    result_batch["spectrogram"] = pad_sequence(
+        result_batch["spectrogram"], batch_first=True
+    ).transpose(-1, -2)
+    result_batch["spectrogram_length"] = torch.tensor(
+        result_batch["spectrogram_length"], dtype=torch.int
+    )
+
+    result_batch["text_encoded"] = pad_sequence(
+        result_batch["text_encoded"], batch_first=True
+    ).squeeze(-1)
+    result_batch["text_encoded_length"] = torch.tensor(
+        result_batch["text_encoded_length"], dtype=torch.int
+    )
+
     return result_batch
