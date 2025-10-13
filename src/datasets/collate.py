@@ -34,6 +34,6 @@ def collate_fn(dataset_items: list[dict]):
         ).long()
         if key == "spectrogram":
             result_batch[key] = result_batch[key].transpose(1, 2)  # (B, F, T)
-        else:
-            result_batch[key] = values  # keep as list (e.g., strings, paths)
+    else:
+        result_batch[key] = values  # keep as list (e.g., strings, paths)
     return result_batch
