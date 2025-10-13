@@ -60,22 +60,20 @@ class CTCTextEncoder:
 
     def ctc_decode(self, inds) -> str:
         """
-        CTC decoding implementation.
-
-        Args:
-            inds (list): list of tokens.
-        Returns:
-            decoded_text (str): decoded text without empty tokens and
-                repetitions.
+        Decoding with CTC.
         """
-        decoded = []
-        prev_char = None
-        for ind in inds:
-            cur_char = self.ind2char[int(ind)]
-            if cur_char != self.EMPTY_TOK and cur_char != prev_char:
-                decoded.append(self.ind2char[int(ind)])
-            prev_char = self.ind2char[int(ind)]
-        return "".join(decoded).strip()
+        text = self.EMPTY_TOK
+        prev_symb = self.EMPTY_TOK
+
+        for index in inds:
+            current = index
+
+            if current == prev_symb:
+                continue
+
+            prev_symb = current
+            text += self.ind2char[current]
+        return text
 
     @staticmethod
     def normalize_text(text: str):
