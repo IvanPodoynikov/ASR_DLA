@@ -30,6 +30,7 @@ class DeepSpeechWrapper(nn.Module):
                 transformed lengths.
         """
         output = self.net(spectrogram.transpose(1, 2))
+        print(f"Output: {output}")
         log_probs = nn.functional.log_softmax(output, dim=-1)
         log_probs_length = self.transform_input_lengths(spectrogram_length)
         return {"log_probs": log_probs, "log_probs_length": log_probs_length}
