@@ -31,7 +31,7 @@ class MultiHeadSelfAttentionModule(nn.Module):
         super().__init__()
         self.layer_norm = nn.LayerNorm(normalized_shape=dim)
         self.mhsa = nn.MultiheadAttention(
-            embed_dim=dim, num_heads=num_heads, dropout=p, batch_first=True
+            embed_dim=dim, num_heads=num_heads, batch_first=True
         )
         self.dropout = nn.Dropout(p=p)
 
