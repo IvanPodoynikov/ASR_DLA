@@ -67,16 +67,18 @@ class CTCTextEncoder:
             decoded_text (str): decoded text without empty tokens and
                 repetitions.
         """
-        prev_ind = None
-        res = ""
-        for ind in inds:
-            cur_ind = ind
-            if cur_ind == prev_ind:
+        text = self.EMPTY_TOK
+        prev_symb = self.EMPTY_TOK
+
+        for index in inds:
+            current = index
+
+            if current == prev_symb:
                 continue
-            prev_ind = cur_ind
-            if self.ind2char[cur_ind] != self.EMPTY_TOK:
-                res += self.ind2char[cur_ind]
-        return res
+
+            prev_symb = current
+            text += self.ind2char[current]
+        return text
 
     @staticmethod
     def normalize_text(text: str):
