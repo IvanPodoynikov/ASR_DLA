@@ -17,7 +17,7 @@ def calc_wer(target_text, predicted_text) -> float:
 
 
 def ctc_beam_search(
-    log_probs: Tensor, ctc_blank: str, beam_size: str = 10
+    log_probs: Tensor, ctc_blank: int, beam_size: int = 10
 ) -> List[int]:
     """
     Performs CTC beam search decoding.
@@ -30,7 +30,7 @@ def ctc_beam_search(
         best_path (List[int]): The most probable token indices.
     """
     T, V = log_probs.shape
-    beams = [(("", ctc_blank), 0.0)]  # ((prefix, char), probability)
+    beams = [(("", ctc_blank), 0.0)]  # ((prefix, int), probability)
 
     for t in range(T):
         new_beams = {}
