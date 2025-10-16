@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import List
 
 import editdistance
+import numpy as np
 from torch import Tensor
 
 # Don't forget to support cases when target_text == ''
@@ -16,14 +17,6 @@ def calc_wer(target_text, predicted_text) -> float:
     target_words = target_text.split()
     predicted_words = predicted_text.split()
     return editdistance.eval(target_words, predicted_words) / len(target_words)
-
-
-def _log_add(a, b):
-    if a == float("-inf"):
-        return b
-    if b == float("-inf"):
-        return a
-    return math.logaddexp(a, b)
 
 
 def _expand_and_merge_beams(dp, cur_log_prob, ctc_blank):
@@ -44,7 +37,7 @@ def _expand_and_merge_beams(dp, cur_log_prob, ctc_blank):
                     new_pref = pref + (idx,)
 
             key = (new_pref, idx)
-            new_dp[key] = _log_add(new_dp[key], new_logp)
+            new_dp[key] = float(np.logaddexp(new_dp[key], new_logp))
 
     return dict(new_dp)
 
