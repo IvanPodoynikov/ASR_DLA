@@ -1,3 +1,5 @@
+import math
+from collections import defaultdict
 from typing import List
 
 import editdistance
@@ -16,6 +18,42 @@ def calc_wer(target_text, predicted_text) -> float:
     return editdistance.eval(target_words, predicted_words) / len(target_words)
 
 
+def _log_add(a, b):
+    if a == float("-inf"):
+        return b
+    if b == float("-inf"):
+        return a
+    return math.logaddexp(a, b)
+
+
+def _expand_and_merge_beams(dp, cur_log_prob, ctc_blank):
+    V = cur_log_prob.shape[0]
+    new_dp = defaultdict(lambda: float("-inf"))
+
+    for (pref, prev_char), pref_logp in dp.items():
+        for idx in range(V):
+            logp = cur_log_prob[idx].item()
+            new_logp = pref_logp + logp
+
+            if idx == ctc_blank:
+                new_pref = pref
+            else:
+                if idx == prev_char:
+                    new_pref = pref
+                else:
+                    new_pref = pref + (idx,)
+
+            key = (new_pref, idx)
+            new_dp[key] = _log_add(new_dp[key], new_logp)
+
+    return dict(new_dp)
+
+
+def _truncate_beams(dp, beam_size):
+    items = sorted(dp.items(), key=lambda kv: kv[1], reverse=True)[:beam_size]
+    return dict(items)
+
+
 def ctc_beam_search(
     log_probs: Tensor, ctc_blank: int, beam_size: int = 10
 ) -> List[int]:
@@ -30,28 +68,12 @@ def ctc_beam_search(
         best_path (List[int]): The most probable token indices.
     """
     T, V = log_probs.shape
-    beams = [(("", ctc_blank), 0.0)]  # ((prefix, int), probability)
+    dp = {(tuple(), ctc_blank): 0.0}
 
     for t in range(T):
-        new_beams = {}
-        for (prefix, prev_ind), prefix_proba in beams:
-            for cur_ind in range(V):
-                cur_proba = prefix_proba + log_probs[t, cur_ind].item()
+        cur_log_prob = log_probs[t]
+        dp = _expand_and_merge_beams(dp, cur_log_prob, ctc_blank)
+        dp = _truncate_beams(dp, beam_size)
 
-                if cur_ind == ctc_blank:
-                    cur_prefix = prefix
-                elif cur_ind == prev_ind:
-                    cur_prefix = prefix
-                else:
-                    cur_prefix = prefix + str(cur_ind)
-
-                key = (cur_prefix, cur_ind)
-                new_beams[key] = cur_proba
-
-        # Keep only the top `beam_size` beams
-        beams = sorted(new_beams.items(), key=lambda x: x[1], reverse=True)[:beam_size]
-        beams = [((prefix, char), proba) for (prefix, char), proba in beams]
-
-    best_path = max(beams, key=lambda x: x[1])[0][0]
-    best_path = [int(ch) for ch in best_path]
-    return best_path
+    (best_prefix, _), best_logp = max(dp.items(), key=lambda kv: kv[1])
+    return list(best_prefix)
