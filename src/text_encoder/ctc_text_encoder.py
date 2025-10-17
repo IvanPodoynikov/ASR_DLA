@@ -58,6 +58,18 @@ class CTCTextEncoder:
         """
         return "".join([self.ind2char[int(ind)] for ind in inds]).strip()
 
+    def ctc_decode_mine(self, inds):
+        prev_ind = None
+        res = ""
+        for ind in inds:
+            cur_ind = ind
+            if cur_ind == prev_ind:
+                continue
+            prev_ind = cur_ind
+            if self.ind2char[cur_ind] != self.EMPTY_TOK:
+                res += self.ind2char[cur_ind]
+        return res
+
     def ctc_decode(self, inds):
         """CTC decoding implementation.
 
@@ -78,6 +90,7 @@ class CTCTextEncoder:
 
             prev_symb = current
             text += self.ind2char[current]
+        assert self.ctc_decode_mine(inds) == text, "NOT EQUAL CTC DECODE"
         return text
 
     @staticmethod
