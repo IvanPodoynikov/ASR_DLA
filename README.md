@@ -1,79 +1,58 @@
-# Automatic Speech Recognition (ASR) with PyTorch
+# Review
 
-<p align="center">
-  <a href="#about">About</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#how-to-use">How To Use</a> •
-  <a href="#credits">Credits</a> •
-  <a href="#license">License</a>
-</p>
+## Overall
+Не удалось обучить ни одну из моделей. Думаю, что в коде есть баг, который проявляется на example датасете. Вывод сделан после анализа предсказаний DeepSpeech2.
 
-## About
+Подробности по финальным запускам **каждой** из моделей в example.ipynb
 
-This repository contains a template for solving ASR task with PyTorch. This template branch is a part of the [HSE DLA course](https://github.com/markovka17/dla) ASR homework. Some parts of the code are missing (or do not follow the most optimal design choices...) and students are required to fill these parts themselves (as well as writing their own models, etc.).
+## Torch Deepspeech
+Было замечено, что модель выдает nan predictions спустя несколько итераций.  
+Попытки исправить:  
+1. zero_infinity=True в CTCLoss
+2. max_zero_grad=1 в конфиге.
 
-See the task assignment [here](https://github.com/markovka17/dla/tree/2024/hw1_asr).
 
-## Installation
+не привели к результату
 
-Follow these steps to install the project:
+## Deepspeech2
+Было принято решение протестировать deepspeech2.
+1. Сходимость на onebatchtest наблюдается.
+2. Сходимости на librispeech нет. Поведение метрик странное.
 
-0. (Optional) Create and activate new environment using [`conda`](https://conda.io/projects/conda/en/latest/user-guide/getting-started.html) or `venv` ([`+pyenv`](https://github.com/pyenv/pyenv)).
+**Onebatchtest**
+Все хорошо
+<details>
+<summary>Показать изображение</summary>
 
-   a. `conda` version:
+<img width="1151" height="324" alt="image" src="https://github.com/user-attachments/assets/96bbdcb3-cd7f-41ff-8cbd-e15d6da61d00" />
+<img width="1156" height="322" alt="image" src="https://github.com/user-attachments/assets/d5adda1c-77b8-4408-a79f-14ad12c0788b" />
+</details>
 
-   ```bash
-   # create env
-   conda create -n project_env python=PYTHON_VERSION
+**Example**
+Неадекватное поведение метрик. Нет падения лосса. В prediction выдает одну букву
+<details>
+<summary>Показать изображение</summary>
+<img width="1156" height="329" alt="image" src="https://github.com/user-attachments/assets/59a7b34e-2858-442f-9076-0c467cab58e2" />
+<img width="1158" height="310" alt="image" src="https://github.com/user-attachments/assets/fe5de1b0-7534-47e9-9496-b387e4bf54b5" />
+<img width="1155" height="210" alt="image" src="https://github.com/user-attachments/assets/f7e0f0df-91e2-4e3a-a109-5b285800f061" />
+</details>
 
-   # activate env
-   conda activate project_env
-   ```
+## Conformer
+Плохая сходимость в целом
 
-   b. `venv` (`+pyenv`) version:
+**Onebatchtest**
+<details>
+<summary>Показать изображение</summary>
+<img width="2421" height="630" alt="image" src="https://github.com/user-attachments/assets/f13395e4-042c-470b-8f5c-2e73ab9ebdee" />
+<img width="2432" height="638" alt="image" src="https://github.com/user-attachments/assets/67b9bc4b-2b07-47fc-90b8-bdd2c241e992" />
+</details>
 
-   ```bash
-   # create env
-   ~/.pyenv/versions/PYTHON_VERSION/bin/python3 -m venv project_env
+**Example**
+<details>
+<summary>Показать изображение</summary>
+<img width="1156" height="320" alt="image" src="https://github.com/user-attachments/assets/dee3ccd3-80a7-45c0-9fa4-ca7f3819d8cd" />
+<img width="1156" height="335" alt="image" src="https://github.com/user-attachments/assets/daf70fc3-72a0-4ebf-8771-2b9dde842222" />
+<img width="1156" height="280" alt="image" src="https://github.com/user-attachments/assets/3335c2f3-957d-4059-9e9c-c2b319838e15" />
+</details>
 
-   # alternatively, using default python version
-   python3 -m venv project_env
 
-   # activate env
-   source project_env/bin/activate
-   ```
-
-1. Install all required packages
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. Install `pre-commit`:
-   ```bash
-   pre-commit install
-   ```
-
-## How To Use
-
-To train a model, run the following command:
-
-```bash
-python3 train.py -cn=CONFIG_NAME HYDRA_CONFIG_ARGUMENTS
-```
-
-Where `CONFIG_NAME` is a config from `src/configs` and `HYDRA_CONFIG_ARGUMENTS` are optional arguments.
-
-To run inference (evaluate the model or save predictions):
-
-```bash
-python3 inference.py HYDRA_CONFIG_ARGUMENTS
-```
-
-## Credits
-
-This repository is based on a [PyTorch Project Template](https://github.com/Blinorot/pytorch_project_template).
-
-## License
-
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
