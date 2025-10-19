@@ -31,9 +31,6 @@ def collate_fn(dataset_items: list[dict]):
     if not dataset_items:
         return result_batch
 
-    # print(dataset_items[0]['spectrogram'].shape, dataset_items[1]['spectrogram'].shape)
-    # assert 1 == 0
-
     for element in dataset_items:
         result_batch["audio"].append(element["audio"])
         result_batch["audio_path"].append(element["audio_path"])
@@ -64,3 +61,4 @@ def collate_fn(dataset_items: list[dict]):
     result_batch["text_encoded_length"] = torch.tensor(
         result_batch["text_encoded_length"]
     )
+    return result_batch
